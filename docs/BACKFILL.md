@@ -31,13 +31,13 @@ One-time import of my 2026 Toggl Track entries into bonsai's database, so `bon w
   - `completed = 1`, `source = 'toggl'`
 - Tag by project:
   - `Working` → `work`
-  - `Learning` → `learning`
-  - `Tinkering` → `tinkering`
+  - `Learning` → `study`
+  - `Tinkering` → `tinker`
   - empty or any other project → set the row aside; the rest still import. Output lists each unknown project with its row count.
 - Set-aside rows go to a new `<input>-set-aside-<timestamp>.csv` next to the input (never overwrites an earlier one), same columns, for me to fix by hand. Importing that file after I fill in projects adds only those rows.
 - Skip rows that round to 0 minutes (zero-length or a few seconds).
 - Skip a row if a session with the same local `start` clock time already exists (offset ignored), so running the import twice adds nothing.
-- Life tags created by the import (`learning`, `tinkering`) get their default emoji and don't trigger the "New tag?" prompt.
+- Life tags created by the import (`study`, `tinker`) get their default emoji and don't trigger the "New tag?" prompt.
 - Save everything in one transaction: either all rows import or none do.
 
 ## Output
@@ -48,7 +48,7 @@ Expected for `toggl-2026-merged.csv` on an empty DB:
 
 - 723 rows read: 10 zero-length, 22 set aside (all no-project, 2026-11-13 to 2026-11-25)
 - 691 sessions, 2026-01-05 to 2026-11-12
-- 1,395.8 h total: work 1,315.6 h, tinkering 40.3 h, learning 39.9 h
+- 1,395.8 h total: work 1,315.6 h, tinker 40.3 h, study 39.9 h
 
 ## Acceptance tests
 

@@ -53,7 +53,7 @@ SAMPLE = [
 
 
 @pytest.mark.parametrize("project, expected", [
-    ("Working", "work"), ("Learning", "learning"), ("Tinkering", "tinkering"),
+    ("Working", "work"), ("Learning", "study"), ("Tinkering", "tinker"),
     ("", None), ("Side gig", None), ("working", None),
 ])
 def test_toggl_tag(project, expected):
@@ -69,7 +69,7 @@ def test_dry_run_reports_and_saves_nothing(cli, rows, csvfile, capsys):
     assert "2 set aside" in out
     assert "3 sessions" in out
     assert f"{D1.isoformat()} to {D2.isoformat()}" in out
-    assert "work 1.0" in out and "learning 0.5" in out and "tinkering 0.8" in out
+    assert "work 1.0" in out and "study 0.5" in out and "tinker 0.8" in out
     assert "nothing saved" in out.lower()
     assert rows() == []
     assert set_aside_files(path) == []
@@ -78,14 +78,14 @@ def test_dry_run_reports_and_saves_nothing(cli, rows, csvfile, capsys):
 def test_import_saves_sessions(cli, rows, tags, csvfile):
     assert backfill.main(["import", csvfile(SAMPLE)]) == 0
     saved = rows()
-    assert [r["tag"] for r in saved] == ["work", "learning", "tinkering"]
+    assert [r["tag"] for r in saved] == ["work", "study", "tinker"]
     first = saved[0]
     assert first["start"].startswith(f"{D1.isoformat()}T09:00:00")
     assert first["end"].startswith(f"{D1.isoformat()}T10:00:00")
     assert first["start"][19] in "+-"  # stored with offset, like other sessions
     assert saved[1]["planned_min"] == 30 and saved[1]["actual_min"] == pytest.approx(30.0)
     assert all(r["completed"] == 1 and r["source"] == "toggl" for r in saved)
-    assert tags() == {"learning": bonsai.DEFAULT_EMOJIS[0], "tinkering": bonsai.DEFAULT_EMOJIS[1]}
+    assert tags() == {"study": bonsai.DEFAULT_EMOJIS[0], "tinker": bonsai.DEFAULT_EMOJIS[1]}
     assert cli.prompts == []
 
 

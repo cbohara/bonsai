@@ -93,7 +93,7 @@ def pdf_to_csv(src: str, out: str) -> int:
 
 # --- CSV -> bonsai -------------------------------------------------------------
 
-TOGGL_PROJECTS = {"Working": "work", "Learning": "learning", "Tinkering": "tinkering"}
+TOGGL_PROJECTS = {"Working": "work", "Learning": "study", "Tinkering": "tinker"}
 
 
 def toggl_tag(project: str) -> str | None:
