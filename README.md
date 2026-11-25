@@ -14,7 +14,7 @@ I kept missing the alert in other timers. I liked Forest, but it was buggy and o
 │      ▀ ▀▀▀ ▀ ▀▀▀   ▀                           │
 │                                                │
 │    ━━━━━━━━━━━━━━━━━╸                          │
-│    🌱 🌱 · ·                                   │
+│    🌱 🌱 · ·                                  │
 │                                                │
 ╰────────────────── q to stop ───────────────────╯
 ```
