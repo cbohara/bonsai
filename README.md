@@ -32,10 +32,12 @@ Check the sound: `bon test-ding`
 
 ## A session
 
-```
-🌱 · · ·  →  🌱 🌱 · ·  →  🌱 🌱 🌱 ·  →  ding ×3 + Good focus session? [Y/n]
-   │                                       y → 🌵 planted
-   q → 🥀 hours only                       n → hours only
+```mermaid
+flowchart LR
+    A["🌱 🌱 · ·"] -- "time's up" --> B["ding<br/>focused?"]
+    A -- "q" --> C["🥀 hours only"]
+    B -- "y" --> D["🌵 planted"]
+    B -- "n" --> C
 ```
 
 ```sh
