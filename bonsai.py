@@ -164,7 +164,7 @@ def actual_minutes(start_ts: float, end_ts: float, planned_min: int) -> float:
 
 
 def resolve_tag(tag: str) -> str:
-    return {"w": "work", "l": "learning"}.get(tag, tag)
+    return "work" if tag == "w" else tag
 
 
 # --- DB layer ---------------------------------------------------------------
@@ -406,7 +406,7 @@ def make_console() -> Console:
 
 
 def needs_confirm(conn, tag: str) -> bool:
-    return tag not in ("work", "learning") and tag not in get_tags(conn)
+    return tag != "work" and tag not in get_tags(conn)
 
 
 def new_tag_ok(conn, tag: str) -> bool:
@@ -636,7 +636,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="cmd")
 
     p = sub.add_parser("start", help="start a session (default command)")
-    p.add_argument("tag", nargs="?", help="tag (w = work, l = learning) or minutes")
+    p.add_argument("tag", nargs="?", help="tag (w = work) or minutes")
     p.add_argument("minutes", nargs="?", type=minutes_arg)
 
     sub.add_parser("today", help="today's sessions and garden row")

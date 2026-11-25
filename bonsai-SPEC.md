@@ -17,7 +17,7 @@ I run every focus session for a week with `bonsai`, never miss the end-of-sessio
 
 | Command | What it does |
 |---|---|
-| `bonsai start [tag] [minutes]` | Start a session. Tag defaults to `work`, minutes to `30` (both remembered from last use). Accepts `w` (work) and `l` (learning, a life tag) shortcuts. |
+| `bonsai start [tag] [minutes]` | Start a session. Tag defaults to `work`, minutes to `30` (both remembered from last use). Accepts `w` as a shortcut for work. Life tags are always typed in full. |
 | `bonsai` | Alias for `bonsai start` with last-used tag and minutes. |
 | `bonsai today` | Today's sessions, total per tag, today's garden row. |
 | `bonsai week [--last] [--detail]` | This week (Mon–Sun): hours per day in two top-level columns, **work** and **life**, plus the work total vs 40h. `--detail` breaks life down by tag (learning, writing, …). |
@@ -33,7 +33,7 @@ I run every focus session for a week with `bonsai`, never miss the end-of-sessio
 - Deadline computed from wall-clock start (`time.time()`), so a laptop that sleeps or lags still ends on time.
 - **Keep the Mac awake** for the session: run `caffeinate -i -w <pid>` as a child process so it ends when `bonsai` exits. This only prevents idle sleep; closing the lid still sleeps the Mac. That's fine: the wall-clock deadline handles it (see test 3).
 - `actual_min` is capped at `planned_min` (a session that ends late because the Mac slept still records the planned length).
-- **New tag check:** the first time a tag is used (`start` or `log`), ask `New tag "learnign"? [y/N]` so typos don't become tags. `w`/`l` shortcuts and existing tags never ask.
+- **New tag check:** the first time a tag is used (`start` or `log`), ask `New tag "learnign"? [y/N]` so typos don't become tags. `work`, `w` and existing tags never ask. `learning` is an ordinary life tag and asks the first time like any other.
 - **`q` or Esc = stop early** (Ctrl+C also works; Cmd+C can't, the terminal keeps it for copy). Record actual minutes (counts toward hours) with `completed = 0`. The plant wilts; nothing is planted. The live view shows `q to stop`.
 - **Pause** is not a feature. Stop and start again.
 - **Focus check:** after the ding, ask `Good focus session? [Y/n]`. Enter or `y` keeps the plant. `n` sets `completed = 0`: hours still count, no plant, no streak credit. The row is saved before the question, so Ctrl+C or closing the terminal keeps it as good. A "not focused" row is one with `completed = 0` and `actual_min = planned_min`.

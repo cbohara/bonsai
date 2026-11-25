@@ -16,10 +16,13 @@ def test_tag_w_shortcut_is_refused(cli, add_session, tags, capsys):
     assert tags() == {"learning": "🍄"}
 
 
-def test_tag_l_shortcut_updates_learning(cli, add_session, tags):
-    add_session("learning", date.today(), emoji="🍄")
-    assert cli.run(["tag", "l", "🌼"]) == 0
-    assert tags() == {"learning": "🌼"}
+def test_learning_is_an_ordinary_life_tag(cli, tags):
+    # No `l` shortcut and no built-in learning: first use asks like any new tag.
+    cli.run(["start", "learning", "25"])
+    assert [p.strip() for p in cli.prompts] == ['New tag "learning"? [y/N]']
+    assert cli.timer_calls == [(25, "learning")]
+    cli.run(["start", "l", "25"])
+    assert [p.strip() for p in cli.prompts][-1] == 'New tag "l"? [y/N]'
 
 
 def test_ding_escapes_quotes_in_notification(monkeypatch):

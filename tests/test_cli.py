@@ -141,7 +141,7 @@ def test_start_writes_row_and_dings_caffeinate_first(cli):
 # --- 15 ------------------------------------------------------------------
 def test_log_yesterday_shows_in_week_and_garden(cli, rows, day_row, capsys):
     assert cli.run(["log", "learning", "30", "--date", YESTERDAY.isoformat()]) == 0
-    assert cli.prompts == []
+    assert [p.strip() for p in cli.prompts] == ['New tag "learning"? [y/N]']
     (row,) = rows()
     assert {k: row[k] for k in ("tag", "planned_min", "completed", "source")} == {
         "tag": "learning", "planned_min": 30, "completed": 1, "source": "manual"}
@@ -166,7 +166,7 @@ def test_log_yesterday_at_sets_start_time(cli, rows):
 
 
 # --- 16 ------------------------------------------------------------------
-@pytest.mark.parametrize("given, expected", [("w", "work"), ("l", "learning"), ("work", "work"),
+@pytest.mark.parametrize("given, expected", [("w", "work"), ("l", "l"), ("work", "work"),
                                              ("writing", "writing"), ("W", "W"), ("ww", "ww")])
 def test_new_tag_prompt_and_shortcuts_resolve(given, expected):
     assert bonsai.resolve_tag(given) == expected
@@ -195,11 +195,10 @@ def test_new_tag_prompt_and_shortcuts_start_declined(cli, rows, tags):
 
 
 def test_new_tag_prompt_and_shortcuts_never_prompt(cli, add_session):
-    for argv in (["start", "work"], ["start", "learning"], ["start", "w"], ["start", "l"],
-                 ["log", "learning", "30"], ["log", "w", "30"], ["log", "l", "30"]):
+    for argv in (["start", "work"], ["start", "w"], ["log", "w", "30"], ["log", "work", "30"]):
         cli.run(argv)
     assert cli.prompts == []
-    assert [t for _, t in cli.timer_calls] == ["work", "learning", "work", "learning"]
+    assert [t for _, t in cli.timer_calls] == ["work", "work"]
 
     add_session("writing", TODAY, emoji="🌻")
     cli.run(["start", "writing"])
@@ -219,6 +218,7 @@ def test_undo_last_only(cli, rows, capsys):
     _three_sessions(cli)
     before = rows()
     capsys.readouterr()
+    cli.prompts.clear()  # ignore new-tag prompts from setup
     seen = {}
     cli.on_confirm = lambda prompt: seen.setdefault("out", capsys.readouterr().out + prompt)
     cli.answer = True
@@ -414,7 +414,7 @@ def test_cap_warning_on_work_start(cli, add_session, capsys):
 
 def test_cap_warning_on_work_start_not_for_life(cli, add_session, capsys):
     add_session("work", MONDAY, "00:01", actual_min=38 * 60, planned_min=38 * 60)
-    assert cli.run(["start", "l", "25"]) == 0
+    assert cli.run(["start", "learning", "25"]) == 0
     out = capsys.readouterr().out
     assert bonsai.cap_warning(38.0).strip() not in out
     assert cli.timer_calls == [(25, "learning")]
