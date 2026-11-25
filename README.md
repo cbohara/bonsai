@@ -1,69 +1,94 @@
 # bonsai 🌱
 
-A Pomodoro timer and time tracker for my Mac's terminal. I start a focus session, get a ding in my headphones when it ends, and grow a small garden for every session I finish.
+A focus timer for my Mac's terminal. It dings in my headphones when time's up and grows a garden from the sessions I finish.
 
 I built it because I kept missing the end-of-session alert in other timers. I liked the idea behind Forest, growing something while you focus, but it was buggy and it lives on my phone, which is the thing I'm trying not to pick up. So I wanted the same idea in my terminal, plus one place to see whether my work hours were creeping past 40 a week.
 
+```
+╭──────────────────── bonsai ────────────────────╮
+│                                                │
+│    work                                        │
+│                                                │
+│     ▀█ █▀▀   ▀▀█  ▀█                           │
+│      █ █▀█ ▀  ▀█   █                           │
+│      ▀ ▀▀▀ ▀ ▀▀▀   ▀                           │
+│                                                │
+│    ━━━━━━━━━━━━━━━━━╸                          │
+│    🌱 🌱 · ·                                   │
+│                                                │
+╰────────────────── q to stop ───────────────────╯
+```
+
 ## Setup
 
-You need macOS and [uv](https://docs.astral.sh/uv/). The first run installs the one dependency (`rich`).
-
-Clone the repo, then add this to `~/.zshrc`:
+Needs macOS and [uv](https://docs.astral.sh/uv/). Add to `~/.zshrc`:
 
 ```sh
 alias bonsai="uv run ~/git/bonsai/bonsai.py"
 alias bon=bonsai
 ```
 
-Then check the sound with `bon test-ding`.
+Check the sound: `bon test-ding`
 
-## A normal day
+## A session
 
-```sh
-bon start w 30        # 30-minute work session
-bon                   # same tag and length as last time
-bon start writing 45  # a life tag, typed in full
+```mermaid
+flowchart LR
+    A["bon start w 30"] --> B["🌱 · · ·<br/>🌱 🌱 · ·<br/>🌱 🌱 🌱 ·"]
+    B -- "q" --> C["🥀 hours only"]
+    B -- "time's up" --> D["ding ×3<br/>Good focus session? [Y/n]"]
+    D -- "y" --> E["🌵 planted"]
+    D -- "n" --> C
 ```
 
-During a session, press `q` to stop early. You keep the hours, but no plant grows.
-
-When the timer ends, the ding plays three times and asks **Good focus session? [Y/n]**. Answer with one key while it's still playing. `n` keeps the hours but skips the plant, for the times I sat there and didn't really focus.
-
-## Checking in
-
 ```sh
-bon today    # today's sessions and garden
-bon week     # hours per day, work vs life, and a bar toward 40h
-bon garden   # the last 4 weeks of plants and my streak
+bon start w 30         # work
+bon start writing 45   # life tags are typed in full
+bon                    # repeat the last one
 ```
 
-## Tags
+## My week
 
-Every session is either **work** (🌵) or a **life** tag like learning or writing. Each life tag gets its own plant. I can change it:
+```
+$ bon week
+  Day              Work   Life
+ ──────────────────────────────
+  Mon 2026-11-23    2.5    0.5
+  Tue 2026-11-24    2.5    1.0
+  Wed 2026-11-25    2.5    0.5
+  ...
+  Total             7.5    2.0
 
-```sh
-bon tag              # list tags
-bon tag writing 🌻   # set writing's plant
+Work 7.5h / 40h  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-## Fixing mistakes
+The bar turns yellow at 32h and red at 38h.
 
-```sh
-bon log w 30 --at 14:00   # add a session I forgot to start
-bon undo                  # delete the last session
-bon export                # all sessions as a CSV
+## My garden
+
+One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
+
+```
+$ bon garden
+Garden  streak 3  ·  best 3  ·  19 plants
+
+  Mon 2026-11-23   🌵 🌵 🌵 🌵 🌵   🍄        3.0
+  Tue 2026-11-24   🌵 🌵 🌵 🌵 🌵   🌻 🌻     3.5
+  Wed 2026-11-25   🌵 🌵 🌵 🌵 🌵   🍄        3.0
+
+🌵 work  🍄 learning  🌻 writing
 ```
 
-## Where the data lives
-
-Everything is in `~/.bonsai/bonsai.db`, a SQLite file outside the repo. Delete it to start over.
-
-## Changing the sound
-
-The sound file, repeat count and volume are constants at the top of `bonsai.py`.
-
-## Tests
+## Everything else
 
 ```sh
-uv run --with pytest --with rich pytest -q
+bon today                  # today's sessions
+bon tag writing 🌻         # pick a life tag's plant
+bon log w 30 --at 14:00    # add one I forgot
+bon undo                   # delete the last one
+bon export                 # CSV of everything
 ```
+
+Data lives in `~/.bonsai/bonsai.db`. Sound, repeats and volume are at the top of `bonsai.py`.
+
+Tests: `uv run --with pytest --with rich pytest -q`
