@@ -12,7 +12,7 @@ A focus timer for my Mac's terminal. It dings in my headphones, tracks where my 
 │      ▀ ▀▀▀ ▀ ▀▀▀   ▀                           │
 │                                                │
 │    ━━━━━━━━━━━━━━━━━╸                          │
-│    🌱 🌱 · ·                                  │
+│    🌱 🌱 · ·                                    │
 │                                                │
 ╰────────────────── q to stop ───────────────────╯
 ```
