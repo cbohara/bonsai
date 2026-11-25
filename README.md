@@ -75,7 +75,7 @@ Garden  streak 3  ·  best 3  ·  19 plants
   Tue 2026-11-24   🌵 🌵 🌵 🌵 🌵   🌻 🌻     3.5
   Wed 2026-11-25   🌵 🌵 🌵 🌵 🌵   🍄        3.0
 
-🌵 work  🍄 study  🌻 writing
+🌵 work  🍄 study  🌻 tinker
 ```
 
 ## Everything else
