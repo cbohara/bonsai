@@ -8,10 +8,14 @@ import argparse
 import csv
 import math
 import os
+import select
 import sqlite3
 import subprocess
 import sys
+import termios
 import time
+import tty
+from contextlib import contextmanager
 from datetime import date, datetime, timedelta
 from datetime import time as dtime
 from pathlib import Path
@@ -236,13 +240,14 @@ def delete_session(conn, session_id: int) -> None:
 
 
 def add_session(conn, tag: str, start: datetime, end: datetime, planned_min: int,
-                actual_min: float, completed: bool, source: str) -> None:
-    conn.execute(
+                actual_min: float, completed: bool, source: str) -> int:
+    cur = conn.execute(
         "INSERT INTO sessions (tag, start, end, planned_min, actual_min, completed, source)"
         " VALUES (?, ?, ?, ?, ?, ?, ?)",
         (tag, start.isoformat(timespec="seconds"), end.isoformat(timespec="seconds"),
          planned_min, actual_min, int(completed), source))
     conn.commit()
+    return cur.lastrowid
 
 
 def hours(sessions: list[dict], group: str | None = None) -> float:
@@ -282,8 +287,51 @@ def timer_view(tag: str, emoji: str, remaining: float, total: float, stopped: bo
             Text(""),
             Text(plant_stage(progress, emoji, stopped)),
         ),
-        title="bonsai", expand=False, padding=(1, 4),
+        title="bonsai", subtitle=None if stopped else "q to stop", expand=False, padding=(1, 4),
     )
+
+
+def is_stop_key(ch: str) -> bool:
+    return ch.lower() in ("q", "\x1b")
+
+
+def stdin_is_tty() -> bool:
+    try:
+        return sys.stdin.isatty()
+    except (AttributeError, OSError, ValueError):
+        return False
+
+
+def stop_key_pressed() -> bool:
+    """Non-blocking: True if q or Esc was pressed since the last check."""
+    if not stdin_is_tty():
+        return False
+    try:
+        if not select.select([sys.stdin], [], [], 0)[0]:
+            return False
+        return is_stop_key(os.read(sys.stdin.fileno(), 1).decode(errors="ignore"))
+    except (OSError, ValueError):
+        return False
+
+
+@contextmanager
+def single_keys():
+    """Let the timer read single keypresses; Ctrl+C still works. Drops leftover input on exit."""
+    if not stdin_is_tty():
+        yield
+        return
+    fd = sys.stdin.fileno()
+    old = termios.tcgetattr(fd)
+    try:
+        tty.setcbreak(fd)
+        yield
+    finally:
+        termios.tcsetattr(fd, termios.TCSAFLUSH, old)
+
+
+def session_status(s: dict) -> str:
+    """Label for a row with completed = 0: ran full length means the focus check said no."""
+    return "not focused" if s["actual_min"] >= s["planned_min"] else "stopped"
 
 
 def run_timer(planned_min: int, tag: str, emoji: str,
@@ -292,7 +340,8 @@ def run_timer(planned_min: int, tag: str, emoji: str,
     start_ts = clock()
     deadline = start_ts + total
     now, completed = start_ts, False
-    with Live(timer_view(tag, emoji, total, total), console=Console(), auto_refresh=False) as live:
+    with single_keys(), Live(timer_view(tag, emoji, total, total), console=Console(),
+                             auto_refresh=False) as live:
         try:
             while True:
                 now = clock()
@@ -301,6 +350,9 @@ def run_timer(planned_min: int, tag: str, emoji: str,
                     break
                 live.update(timer_view(tag, emoji, deadline - now, total), refresh=True)
                 sleep(TICK_S)
+                if stop_key_pressed():
+                    now = clock()
+                    break
         except KeyboardInterrupt:
             now = clock()
         live.update(timer_view(tag, emoji, max(0.0, deadline - now), total, stopped=not completed),
@@ -324,6 +376,15 @@ def ding(tag: str, minutes: int) -> None:
         print(f"warning: notification failed ({e})", file=sys.stderr)
     sys.stdout.write("\a")
     sys.stdout.flush()
+
+
+def ask_focus() -> bool:
+    """Enter/y = good. Only an explicit n/no counts as not focused."""
+    try:
+        return input("Good focus session? [Y/n] ").strip().lower() not in ("n", "no")
+    except (EOFError, KeyboardInterrupt):
+        print()
+        return True
 
 
 def start_caffeinate(pid: int) -> subprocess.Popen:
@@ -376,7 +437,7 @@ def cmd_start(conn, args) -> int:
     try:
         start_ts, end_ts, completed = run_timer(minutes, tag, emoji)
         actual = actual_minutes(start_ts, end_ts, minutes)
-        add_session(conn, tag, datetime.fromtimestamp(start_ts).astimezone(),
+        row_id = add_session(conn, tag, datetime.fromtimestamp(start_ts).astimezone(),
                     datetime.fromtimestamp(end_ts).astimezone(), minutes, actual, completed, "timer")
         if completed:
             try:
@@ -386,11 +447,16 @@ def cmd_start(conn, args) -> int:
     finally:
         caffeinate.terminate()
 
+    if completed and not ask_focus():
+        conn.execute("UPDATE sessions SET completed = 0 WHERE id = ?", (row_id,))
+        conn.commit()
+        console.print(f"🥀 {escape(tag)}: {actual:.0f} min logged, no plant this time.")
+        return 0
     if completed:
         n = plants_for_session(actual, True)
         console.print(f"{emoji} {escape(tag)}: {actual:.0f} min done, {n} plant{'s' * (n != 1)} planted.")
     else:
-        console.print(f"🥀 {escape(tag)}: stopped after {actual:.1f} of {minutes} min. Nothing planted.")
+        console.print(f"🥀 {escape(tag)}: stopped after {round(actual)} of {minutes} min. Nothing planted.")
     return 0
 
 
@@ -416,7 +482,7 @@ def cmd_today(conn, args) -> int:
         console.print("No sessions today.")
         return 0
     for s in sessions:
-        status = {"manual": "logged"}.get(s["source"], "done" if s["completed"] else "stopped")
+        status = {"manual": "logged"}.get(s["source"], "done" if s["completed"] else session_status(s))
         console.print(f"  {s['start'][11:16]}  {emoji_for(s['tag'], tags)} {escape(s['tag'])}"
                       f"  {s['actual_min']:.0f} min  {status}")
     console.print()
@@ -523,7 +589,7 @@ def cmd_undo(conn, args) -> int:
     if s is None:
         print("No sessions to undo.")
         return 0
-    status = "completed" if s["completed"] else "stopped"
+    status = "completed" if s["completed"] else session_status(s)
     print(f"#{s['id']}  {s['start'][:16].replace('T', ' ')}  {s['tag']}"
           f"  {s['actual_min']:.0f} of {s['planned_min']} min  {status}  ({s['source']})")
     if confirm("Delete this session? [y/N]"):

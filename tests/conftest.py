@@ -126,7 +126,9 @@ class Cli:
         self.on_confirm = None
         self.elapsed_s = None  # default: exactly planned_min * 60
         self.completed = True
+        self.focused = True
         monkeypatch.setattr(bonsai, "run_timer", self._run_timer)
+        monkeypatch.setattr(bonsai, "ask_focus", self._ask_focus)
         monkeypatch.setattr(bonsai, "ding", self._ding)
         monkeypatch.setattr(bonsai, "start_caffeinate", self._caffeinate)
         monkeypatch.setattr(bonsai, "confirm", self._confirm)
@@ -142,6 +144,10 @@ class Cli:
     def _ding(self, tag, minutes):
         self.events.append("ding")
         self.ding_calls.append((tag, minutes))
+
+    def _ask_focus(self):
+        self.events.append("focus")
+        return self.focused
 
     def _caffeinate(self, pid):
         self.events.append("caffeinate")

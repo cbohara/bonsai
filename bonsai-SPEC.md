@@ -34,9 +34,10 @@ I run every focus session for a week with `bonsai`, never miss the end-of-sessio
 - **Keep the Mac awake** for the session: run `caffeinate -i -w <pid>` as a child process so it ends when `bonsai` exits. This only prevents idle sleep; closing the lid still sleeps the Mac. That's fine: the wall-clock deadline handles it (see test 3).
 - `actual_min` is capped at `planned_min` (a session that ends late because the Mac slept still records the planned length).
 - **New tag check:** the first time a tag is used (`start` or `log`), ask `New tag "learnign"? [y/N]` so typos don't become tags. `w`/`l` shortcuts and existing tags never ask.
-- **Ctrl+C = stop early.** Record actual minutes (counts toward hours) with `completed = 0`. The plant wilts; nothing is planted.
+- **`q` or Esc = stop early** (Ctrl+C also works; Cmd+C can't, the terminal keeps it for copy). Record actual minutes (counts toward hours) with `completed = 0`. The plant wilts; nothing is planted. The live view shows `q to stop`.
 - **Pause** is not a feature. Stop and start again.
-- No break timer. After the ding, print a one-line summary and exit.
+- **Focus check:** after the ding, ask `Good focus session? [Y/n]`. Enter or `y` keeps the plant. `n` sets `completed = 0`: hours still count, no plant, no streak credit. The row is saved before the question, so Ctrl+C or closing the terminal keeps it as good. A "not focused" row is one with `completed = 0` and `actual_min = planned_min`.
+- No break timer. After the focus check, print a one-line summary and exit.
 
 ## The ding (the most important part)
 
@@ -80,7 +81,7 @@ CREATE TABLE sessions (
   end           TEXT NOT NULL,
   planned_min   INTEGER NOT NULL,
   actual_min    REAL NOT NULL,
-  completed     INTEGER NOT NULL,       -- 1 = ran to the ding, 0 = stopped early
+  completed     INTEGER NOT NULL,       -- 1 = ran to the ding and was focused, 0 = stopped early or not focused
   source        TEXT NOT NULL DEFAULT 'timer'  -- 'timer' | 'manual'
 );
 CREATE TABLE tags (name TEXT PRIMARY KEY, emoji TEXT NOT NULL);  -- life tags only; 'work' is always 🌵
@@ -101,7 +102,8 @@ Write the session row when it ends (completed or stopped). If the process is kil
 ## Acceptance tests
 
 1. `bonsai start w 1` (1 min) → countdown runs, ding plays 3×, notification appears, row saved with `completed = 1`.
-2. Start, then Ctrl+C at 50% → row saved with `completed = 0`, actual minutes about half, nothing planted, terminal left clean.
+2. Start, then press `q` at 50% → row saved with `completed = 0`, actual minutes about half, nothing planted, terminal left clean. Ctrl+C does the same.
+2b. Let a session finish, answer `n` to `Good focus session?` → row has `completed = 0`, `actual_min = planned_min`, nothing planted, hours count.
 3. Close the laptop lid mid-session, reopen after the end time → ding plays right away on wake, `actual_min` = `planned_min` (capped).
 4. `bonsai log learning 30 --date <yesterday>` → shows in yesterday's row of `bonsai week` and `bonsai garden`.
 5. Streak: sessions Thu, Fri, nothing on the weekend, Mon → streak 3.
