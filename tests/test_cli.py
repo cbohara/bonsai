@@ -195,7 +195,8 @@ def test_new_tag_prompt_and_shortcuts_start_declined(cli, rows, tags):
 
 
 def test_new_tag_prompt_and_shortcuts_never_prompt(cli, add_session):
-    for argv in (["start", "work"], ["start", "w"], ["log", "w", "30"], ["log", "work", "30"]):
+    for argv in (["start", "work"], ["start", "w"], ["log", "w", "30", "--at", "01:00"],
+                 ["log", "work", "30", "--at", "02:00"]):
         cli.run(argv)
     assert cli.prompts == []
     assert [t for _, t in cli.timer_calls] == ["work", "work"]
@@ -489,3 +490,35 @@ def test_log_start_with_minutes_works_like_at(cli, rows):
 def test_log_start_end_rejects_bad_input(argv, cli, rows):
     assert cli.run(argv) == 2
     assert rows() == []
+
+
+# --- log overlap check ---------------------------------------------------
+def test_log_overlap_asks_and_decline_saves_nothing(cli, rows, add_session):
+    add_session("work", TODAY, "09:00", actual_min=60)
+    cli.answer = False
+    code = cli.run(["log", "w", "--date", TODAY.isoformat(), "--start", "09:30", "--end", "10:30"])
+    assert code != 0
+    assert len(cli.prompts) == 1
+    assert "work 09:00–10:00" in cli.prompts[0] and "[y/N]" in cli.prompts[0]
+    assert len(rows()) == 1
+
+
+def test_log_overlap_accept_saves(cli, rows, add_session):
+    add_session("work", TODAY, "09:00", actual_min=60)
+    assert cli.run(["log", "w", "--date", TODAY.isoformat(), "--start", "09:30", "--end", "10:30"]) == 0
+    assert len(cli.prompts) == 1
+    assert len(rows()) == 2
+
+
+@pytest.mark.parametrize("start, end", [("10:00", "11:00"), ("08:00", "09:00")])
+def test_log_touching_is_not_overlap(start, end, cli, rows, add_session):
+    add_session("work", TODAY, "09:00", actual_min=60)
+    assert cli.run(["log", "w", "--date", TODAY.isoformat(), "--start", start, "--end", end]) == 0
+    assert cli.prompts == []
+    assert len(rows()) == 2
+
+
+def test_log_other_day_is_not_overlap(cli, rows, add_session):
+    add_session("work", YESTERDAY, "09:00", actual_min=60)
+    assert cli.run(["log", "w", "--date", TODAY.isoformat(), "--start", "09:00", "--end", "10:00"]) == 0
+    assert cli.prompts == []

@@ -164,6 +164,12 @@ def actual_minutes(start_ts: float, end_ts: float, planned_min: int) -> float:
     return float(min(planned_min, (end_ts - start_ts) / 60))
 
 
+def overlapping(sessions: list[dict], start: datetime, end: datetime) -> list[dict]:
+    """Sessions whose time range overlaps [start, end). Touching ends don't count."""
+    return [s for s in sessions
+            if datetime.fromisoformat(s["start"]) < end and start < datetime.fromisoformat(s["end"])]
+
+
 def resolve_tag(tag: str) -> str:
     return "work" if tag == "w" else tag
 
@@ -490,10 +496,20 @@ def cmd_start(conn, args) -> int:
 
 def cmd_log(conn, args) -> int:
     tag = resolve_tag(args.tag)
+    day = args.date or date.today()
+    start = datetime.combine(day, args.at).astimezone()
+    end = start + timedelta(minutes=args.minutes)
+    clash = overlapping(fetch_sessions(conn, day - timedelta(days=1), day), start, end)
+    if clash:
+        tags = get_tags(conn)
+        listed = ", ".join(f"{emoji_for(s['tag'], tags)} {s['tag']} "
+                           f"{datetime.fromisoformat(s['start']):%H:%M}–{datetime.fromisoformat(s['end']):%H:%M}"
+                           for s in clash)
+        if not confirm(f"Overlaps {listed}. Log anyway? [y/N]"):
+            print("Cancelled.")
+            return 1
     if not new_tag_ok(conn, tag):
         return 1
-    start = datetime.combine(args.date or date.today(), args.at).astimezone()
-    end = start + timedelta(minutes=args.minutes)
     add_session(conn, tag, start, end, args.minutes, float(args.minutes), True, "manual")
     emoji = emoji_for(tag, get_tags(conn))
     make_console().print(f"Logged {emoji} {escape(tag)}: {args.minutes} min on {start:%Y-%m-%d %H:%M}.")
