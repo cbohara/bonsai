@@ -2,8 +2,6 @@
 
 A focus timer for my Mac's terminal. It dings in my headphones, tracks where my time goes, and grows a garden from the sessions I finish.
 
-I kept missing the alert in other timers. I liked Forest, but it was buggy and on my phone, the thing I'm trying not to pick up. And I wanted to see where my hours actually go.
-
 ```
 ╭──────────────────── bonsai ────────────────────╮
 │                                                │
