@@ -2,7 +2,7 @@
 
 A Pomodoro timer and time tracker for my Mac's terminal. I start a focus session, get a ding in my headphones when it ends, and grow a small garden for every session I finish.
 
-I built it because I kept missing the end-of-session alert in other timers, and I wanted one place to see whether my work hours were creeping past 40 a week.
+I built it because I kept missing the end-of-session alert in other timers. I liked the idea behind Forest, growing something while you focus, but it was buggy and it lives on my phone, which is the thing I'm trying not to pick up. So I wanted the same idea in my terminal, plus one place to see whether my work hours were creeping past 40 a week.
 
 ## Setup
 
