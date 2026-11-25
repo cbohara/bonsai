@@ -56,7 +56,7 @@ When the session ends:
 - Within a day's row, life plants are grouped by tag (all 🍄 together, then 🌻, …) so it reads as patches, not noise.
 - **One plant per full 30 minutes** of a completed session: 30 min → 1, 60 min → 2, 90 min → 3, 45 min → 1. A completed session shorter than 30 min still plants 1.
 - Separate plants with one space (`🌵 🌵 🌵   🍄 🍄 🌻`), work first, then three spaces, then life.
-- During a session the plant grows in stages tied to progress: `·` seed (0–24%) → `🌱` sprout (25–49%) → `🌿` plant (50–89%) → full plant (90–100%: 🌵 for work, the tag's own emoji for life). A stopped-early session shows `🥀` in the live view and is not planted.
+- During a session the plant grows in stages tied to progress, and earlier stages stay on screen: `🌱` (0–24%) → `🌱 🍃` (25–49%) → `🌱 🍃 🌿` (50–89%) → `🌱 🍃 🌿 🌵` (90–100%; the tag's own emoji for life). Stopping early turns the current stage into `🥀` (e.g. `🌱 🍃 🥀`), and nothing is planted.
 - **Streak (simple, will likely change):** consecutive weekdays with at least one completed session. Weekends never break it; today doesn't break it until the day is over.
 - `bonsai garden` shows a 4-week grid: one row per day (Mon–Sun), its plants, and hours. Header line: current streak, best streak, total plants. Footer: a legend built from the tags table (`🌵 work  🍄 learning  🌻 writing …`).
 

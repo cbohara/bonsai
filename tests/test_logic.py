@@ -20,19 +20,6 @@ def test_plants_for_session(actual, completed, expected):
     assert bonsai.plants_for_session(actual, completed) == expected
 
 
-# --- 2 -------------------------------------------------------------------
-@pytest.mark.parametrize(
-    "progress, expected",
-    [(0.0, "·"), (0.24, "·"), (0.25, "🌱"), (0.49, "🌱"), (0.5, "🌿"),
-     (0.89, "🌿"), (0.9, "🌻"), (1.0, "🌻")],
-)
-def test_plant_stage(progress, expected):
-    assert bonsai.plant_stage(progress, "🌻") == expected
-
-
-@pytest.mark.parametrize("progress", [0.0, 0.3, 0.6, 0.95, 1.0])
-def test_plant_stage_stopped_wilts(progress):
-    assert bonsai.plant_stage(progress, "🌵", stopped=True) == "🥀"
 
 
 # --- 3 -------------------------------------------------------------------
@@ -134,3 +121,19 @@ def test_actual_minutes_capped(start, end, planned, expected):
     result = bonsai.actual_minutes(start, end, planned)
     assert isinstance(result, float)
     assert result == pytest.approx(expected)
+
+
+# --- growth trail in the live view ------------------------------------------
+@pytest.mark.parametrize("progress, expected", [
+    (0.0, "🌱"), (0.24, "🌱"),
+    (0.25, "🌱 🍃"), (0.49, "🌱 🍃"),
+    (0.5, "🌱 🍃 🌿"), (0.89, "🌱 🍃 🌿"),
+    (0.9, "🌱 🍃 🌿 🌻"), (1.0, "🌱 🍃 🌿 🌻"),
+])
+def test_plant_trail_keeps_earlier_stages(progress, expected):
+    assert bonsai.plant_trail(progress, "🌻") == expected
+
+
+@pytest.mark.parametrize("progress, expected", [(0.1, "🥀"), (0.3, "🌱 🥀"), (0.6, "🌱 🍃 🥀")])
+def test_plant_trail_stopped_wilts_current_stage(progress, expected):
+    assert bonsai.plant_trail(progress, "🌵", stopped=True) == expected

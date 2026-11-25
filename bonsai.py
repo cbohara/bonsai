@@ -76,16 +76,13 @@ def plants_for_session(actual_min: float, completed: bool) -> int:
     return max(1, int(actual_min // 30))
 
 
-def plant_stage(progress: float, emoji: str, stopped: bool = False) -> str:
+def plant_trail(progress: float, emoji: str, stopped: bool = False) -> str:
+    """Every stage reached so far, left to right; a stopped session wilts the current one."""
+    stages = ["🌱", "🍃", "🌿", emoji]
+    reached = [s for s, at in zip(stages, (0, 0.25, 0.5, 0.9)) if progress >= at] or ["🌱"]
     if stopped:
-        return "🥀"
-    if progress < 0.25:
-        return "·"
-    if progress < 0.5:
-        return "🌱"
-    if progress < 0.9:
-        return "🌿"
-    return emoji
+        reached[-1] = "🥀"
+    return " ".join(reached)
 
 
 def week_bounds(d: date) -> tuple[date, date]:
@@ -286,7 +283,7 @@ def timer_view(tag: str, emoji: str, remaining: float, total: float, stopped: bo
             Text(""),
             ProgressBar(total=total, completed=total - remaining, width=40, complete_style=color),
             Text(""),
-            Text(plant_stage(progress, emoji, stopped)),
+            Text(plant_trail(progress, emoji, stopped)),
         ),
         title="bonsai", subtitle=None if stopped else "q to stop", expand=False, padding=(1, 4),
     )
