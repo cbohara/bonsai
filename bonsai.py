@@ -77,12 +77,15 @@ def plants_for_session(actual_min: float, completed: bool) -> int:
 
 
 def plant_trail(progress: float, emoji: str, stopped: bool = False) -> str:
-    """Every stage reached so far, left to right; a stopped session wilts the current one."""
-    stages = ["🌱", "🍃", "🌿", emoji]
-    reached = [s for s, at in zip(stages, (0, 0.25, 0.5, 0.9)) if progress >= at] or ["🌱"]
+    """A row of 4 spots that fill with sprouts as the session runs; the last spot is the tag's plant.
+    A stopped session wilts the newest sprout."""
+    filled = max(1, sum(progress >= at for at in (0, 0.25, 0.5, 0.9)))
+    spots = ["🌱"] * filled + ["·"] * (4 - filled)
+    if filled == 4:
+        spots[3] = emoji
     if stopped:
-        reached[-1] = "🥀"
-    return " ".join(reached)
+        spots[filled - 1] = "🥀"
+    return " ".join(spots)
 
 
 def week_bounds(d: date) -> tuple[date, date]:

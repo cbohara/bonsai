@@ -125,15 +125,15 @@ def test_actual_minutes_capped(start, end, planned, expected):
 
 # --- growth trail in the live view ------------------------------------------
 @pytest.mark.parametrize("progress, expected", [
-    (0.0, "🌱"), (0.24, "🌱"),
-    (0.25, "🌱 🍃"), (0.49, "🌱 🍃"),
-    (0.5, "🌱 🍃 🌿"), (0.89, "🌱 🍃 🌿"),
-    (0.9, "🌱 🍃 🌿 🌻"), (1.0, "🌱 🍃 🌿 🌻"),
+    (0.0, "🌱 · · ·"), (0.24, "🌱 · · ·"),
+    (0.25, "🌱 🌱 · ·"), (0.49, "🌱 🌱 · ·"),
+    (0.5, "🌱 🌱 🌱 ·"), (0.89, "🌱 🌱 🌱 ·"),
+    (0.9, "🌱 🌱 🌱 🌻"), (1.0, "🌱 🌱 🌱 🌻"),
 ])
 def test_plant_trail_keeps_earlier_stages(progress, expected):
     assert bonsai.plant_trail(progress, "🌻") == expected
 
 
-@pytest.mark.parametrize("progress, expected", [(0.1, "🥀"), (0.3, "🌱 🥀"), (0.6, "🌱 🍃 🥀")])
+@pytest.mark.parametrize("progress, expected", [(0.1, "🥀 · · ·"), (0.3, "🌱 🥀 · ·"), (0.6, "🌱 🌱 🥀 ·")])
 def test_plant_trail_stopped_wilts_current_stage(progress, expected):
     assert bonsai.plant_trail(progress, "🌵", stopped=True) == expected
