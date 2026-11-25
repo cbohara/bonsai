@@ -1,8 +1,8 @@
 # bonsai 🌱
 
-A focus timer for my Mac's terminal. It dings in my headphones when time's up and grows a garden from the sessions I finish.
+A focus timer for my Mac's terminal. It dings in my headphones, tracks where my time goes, and grows a garden from the sessions I finish.
 
-I built it because I kept missing the end-of-session alert in other timers. I liked the idea behind Forest, growing something while you focus, but it was buggy and it lives on my phone, which is the thing I'm trying not to pick up. So I wanted the same idea in my terminal, plus one place to see whether my work hours were creeping past 40 a week.
+I kept missing the alert in other timers. I liked Forest, but it was buggy and on my phone, the thing I'm trying not to pick up. I also wanted to see my hours, and keep work under 40 a week.
 
 ```
 ╭──────────────────── bonsai ────────────────────╮
