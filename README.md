@@ -61,7 +61,7 @@ $ bon week
 Work 7.5h / 40h  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
-The bar turns yellow at 32h and red at 38h.
+The bar is green, then yellow at 32h and red at 38h.
 
 ## My garden
 
