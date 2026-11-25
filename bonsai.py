@@ -317,6 +317,7 @@ def ding(tag: str, minutes: int) -> None:
     except (OSError, subprocess.CalledProcessError) as e:
         print(f"warning: afplay failed ({e}); using notification and bell", file=sys.stderr)
     text = f"{tag.capitalize()} session done — {minutes} min"
+    text = text.replace("\\", "\\\\").replace('"', '\\"')
     try:
         subprocess.run(["osascript", "-e", f'display notification "{text}" with title "bonsai"'], check=False)
     except OSError as e:
@@ -378,7 +379,10 @@ def cmd_start(conn, args) -> int:
         add_session(conn, tag, datetime.fromtimestamp(start_ts).astimezone(),
                     datetime.fromtimestamp(end_ts).astimezone(), minutes, actual, completed, "timer")
         if completed:
-            ding(tag, minutes)
+            try:
+                ding(tag, minutes)
+            except KeyboardInterrupt:
+                pass
     finally:
         caffeinate.terminate()
 
@@ -494,19 +498,20 @@ def cmd_garden(conn, args) -> int:
 def cmd_tag(conn, args) -> int:
     console = make_console()
     tags = get_tags(conn)
-    if args.name and args.emoji:
+    name = resolve_tag(args.name) if args.name else None
+    if name and args.emoji:
         try:
-            set_tag_emoji(conn, args.name, args.emoji)
+            set_tag_emoji(conn, name, args.emoji)
         except ValueError as e:
             print(f"error: {e}", file=sys.stderr)
             return 1
-        console.print(f"{args.emoji}  {escape(args.name)}  life")
+        console.print(f"{args.emoji}  {escape(name)}  life")
         return 0
     rows = [("work", WORK_EMOJI, "work")] + [(n, e, "life") for n, e in tags.items()]
-    if args.name:
-        rows = [r for r in rows if r[0] == args.name]
+    if name:
+        rows = [r for r in rows if r[0] == name]
         if not rows:
-            print(f'error: no tag named "{args.name}"', file=sys.stderr)
+            print(f'error: no tag named "{name}"', file=sys.stderr)
             return 1
     for name, emoji, group in rows:
         console.print(f"{emoji}  {escape(name)}  {group}")
