@@ -1,6 +1,6 @@
 # bonsai
 
-Single-file Python CLI (`bonsai.py`), macOS only. Spec: `bonsai-SPEC.md`.
+Single-file Python CLI (`bonsai.py`), macOS only. Spec: `docs/SPEC.md`.
 
 ## Commands
 - Test: `uv run --with pytest --with rich pytest -q`
