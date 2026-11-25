@@ -36,7 +36,7 @@ I run every focus session for a week with `bonsai`, never miss the end-of-sessio
 - **New tag check:** the first time a tag is used (`start` or `log`), ask `New tag "learnign"? [y/N]` so typos don't become tags. `work`, `w` and existing tags never ask. `learning` is an ordinary life tag and asks the first time like any other.
 - **`q` or Esc = stop early** (Ctrl+C also works; Cmd+C can't, the terminal keeps it for copy). Record actual minutes (counts toward hours) with `completed = 0`. The plant wilts; nothing is planted. The live view shows `q to stop`.
 - **Pause** is not a feature. Stop and start again.
-- **Focus check:** after the ding, ask `Good focus session? [Y/n]`. Enter or `y` keeps the plant. `n` sets `completed = 0`: hours still count, no plant, no streak credit. The row is saved before the question, so Ctrl+C or closing the terminal keeps it as good. A "not focused" row is one with `completed = 0` and `actual_min = planned_min`.
+- **Focus check:** when the timer ends, ask `Good focus session? [Y/n]` while the ding plays in the background. One keypress, no Enter: `y` or Enter keeps the plant. Answering skips any dings not yet started. `n` sets `completed = 0`: hours still count, no plant, no streak credit. The row is saved before the question, so Ctrl+C or closing the terminal keeps it as good. A "not focused" row is one with `completed = 0` and `actual_min = planned_min`.
 - No break timer. After the focus check, print a one-line summary and exit.
 
 ## The ding (the most important part)
@@ -51,7 +51,7 @@ When the session ends:
 
 ## Garden (gamification)
 
-- **Work is always 🌵.** Every **life tag has its own plant emoji that I choose** (e.g. learning 🍄, writing 🌻, reading 🌷). Emoji ignore terminal colors, so the plant itself carries the meaning. Hours text uses green for work and red/coral for life.
+- **Work is always 🌵.** Every **life tag has its own plant emoji that I choose** (e.g. learning 🍄, writing 🌻, reading 🌷). Emoji ignore terminal colors, so the plant itself carries the meaning. Hours text uses red/coral for work and green for life.
 - A new life tag with no emoji gets the next unused one from a default list: 🍄 🌻 🌷 🌼 🌸 🍀 🌺 🪻. 🌵 is reserved for work and can't be chosen for a life tag.
 - Within a day's row, life plants are grouped by tag (all 🍄 together, then 🌻, …) so it reads as patches, not noise.
 - **One plant per full 30 minutes** of a completed session: 30 min → 1, 60 min → 2, 90 min → 3, 45 min → 1. A completed session shorter than 30 min still plants 1.

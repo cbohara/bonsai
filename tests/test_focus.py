@@ -1,36 +1,36 @@
 """Focus check after the ding, and q/Esc to stop a session."""
 
-import builtins
-
 import pytest
 from test_timer import START, FakeClock
 
 import bonsai
 
-# --- ask_focus ---------------------------------------------------------------
+# --- ask_focus: one keypress, no Enter -------------------------------------
 
-@pytest.mark.parametrize("typed, expected", [
-    ("", True), ("y", True), ("Y", True), ("yes", True),
-    ("n", False), ("N", False), ("no", False),
+def _keys(monkeypatch, *keys):
+    it = iter(keys)
+    monkeypatch.setattr(bonsai, "read_key", lambda: next(it))
+
+
+@pytest.mark.parametrize("keys, expected", [
+    (("y",), True), (("Y",), True), (("\r",), True), (("\n",), True),
+    (("n",), False), (("N",), False),
+    (("x", "q", "n"), False),  # other keys are ignored until y/n/Enter
+    (("",), True),             # EOF counts as good
 ])
-def test_ask_focus_answers(monkeypatch, typed, expected):
-    monkeypatch.setattr(builtins, "input", lambda prompt="": typed)
+def test_ask_focus_single_key(monkeypatch, capsys, keys, expected):
+    _keys(monkeypatch, *keys)
     assert bonsai.ask_focus() is expected
+    out = capsys.readouterr().out
+    assert "Good focus session? [Y/n]" in out
+    assert out.rstrip().endswith("y" if expected else "n")
 
 
-@pytest.mark.parametrize("exc", [EOFError, KeyboardInterrupt])
-def test_ask_focus_defaults_to_good_when_interrupted(monkeypatch, capsys, exc):
-    def boom(prompt=""):
-        raise exc
-    monkeypatch.setattr(builtins, "input", boom)
+def test_ask_focus_ctrl_c_counts_as_good(monkeypatch, capsys):
+    def boom():
+        raise KeyboardInterrupt
+    monkeypatch.setattr(bonsai, "read_key", boom)
     assert bonsai.ask_focus() is True
-
-
-def test_ask_focus_prompt_text(monkeypatch):
-    seen = []
-    monkeypatch.setattr(builtins, "input", lambda prompt="": seen.append(prompt) or "")
-    bonsai.ask_focus()
-    assert "Good focus session? [Y/n]" in seen[0]
 
 
 # --- start + focus check -----------------------------------------------------
@@ -39,7 +39,7 @@ def test_focused_session_keeps_plant(cli, rows):
     assert cli.run(["start", "work", "30"]) == 0
     (row,) = rows()
     assert row["completed"] == 1
-    assert cli.events == ["caffeinate", "timer", "ding", "focus"]
+    assert cli.events == ["caffeinate", "timer", "ding", "focus"]  # ding starts, then the question
 
 
 def test_not_focused_session_keeps_hours_drops_plant(cli, rows, capsys):
@@ -88,3 +88,39 @@ def test_stop_key_pressed_false_without_tty(monkeypatch):
 @pytest.mark.parametrize("key, expected", [("q", True), ("Q", True), ("\x1b", True), ("x", False)])
 def test_is_stop_key(key, expected):
     assert bonsai.is_stop_key(key) is expected
+
+
+# --- ding in the background, stoppable ---------------------------------------
+
+def test_ding_stops_before_next_play_when_answered(monkeypatch):
+    import subprocess
+    import threading
+    stop = threading.Event()
+    plays = []
+
+    def fake_run(args, *a, **kw):
+        plays.append(args[0])
+        stop.set()  # the user answers during the first play
+        return subprocess.CompletedProcess(args, 0)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    monkeypatch.setattr(bonsai.time, "sleep", lambda s: None)
+    bonsai.ding("work", 30, stop)
+    assert plays == ["afplay"]  # no more dings, no notification
+
+
+def test_start_ding_runs_in_background(monkeypatch):
+    import threading
+    started = threading.Event()
+    release = threading.Event()
+
+    def slow_ding(tag, minutes, stop=None):
+        started.set()
+        release.wait(2)
+
+    monkeypatch.setattr(bonsai, "ding", slow_ding)
+    stop = bonsai.start_ding("work", 30)
+    assert started.wait(2)       # ding is running...
+    assert not release.is_set()  # ...and start_ding already returned
+    assert hasattr(stop, "set")
+    release.set()

@@ -8,6 +8,7 @@ the real ~/.bonsai.
 import re
 import sqlite3
 import subprocess
+import threading
 from datetime import date, datetime, timedelta
 from datetime import time as dtime
 
@@ -130,6 +131,7 @@ class Cli:
         monkeypatch.setattr(bonsai, "run_timer", self._run_timer)
         monkeypatch.setattr(bonsai, "ask_focus", self._ask_focus)
         monkeypatch.setattr(bonsai, "ding", self._ding)
+        monkeypatch.setattr(bonsai, "start_ding", self._start_ding)
         monkeypatch.setattr(bonsai, "start_caffeinate", self._caffeinate)
         monkeypatch.setattr(bonsai, "confirm", self._confirm)
 
@@ -148,6 +150,10 @@ class Cli:
     def _ask_focus(self):
         self.events.append("focus")
         return self.focused
+
+    def _start_ding(self, tag, minutes):
+        self._ding(tag, minutes)  # synchronous in tests
+        return threading.Event()
 
     def _caffeinate(self, pid):
         self.events.append("caffeinate")

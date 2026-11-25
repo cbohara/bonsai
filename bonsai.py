@@ -13,6 +13,7 @@ import sqlite3
 import subprocess
 import sys
 import termios
+import threading
 import time
 import tty
 from contextlib import contextmanager
@@ -38,8 +39,8 @@ WORK_CAP_H = 40
 DEFAULT_EMOJIS = ["🍄", "🌻", "🌷", "🌼", "🌸", "🍀", "🌺", "🪻"]
 
 WORK_EMOJI = "🌵"
-WORK_COLOR = "green"
-LIFE_COLOR = "light_coral"
+WORK_COLOR = "light_coral"
+LIFE_COLOR = "green"
 TICK_S = 0.25
 
 SCHEMA = """
@@ -360,14 +361,22 @@ def run_timer(planned_min: int, tag: str, emoji: str,
     return start_ts, now, completed
 
 
-def ding(tag: str, minutes: int) -> None:
+def ding(tag: str, minutes: int, stop: threading.Event | None = None) -> None:
+    """Play the ding; once `stop` is set (the user answered), skip what's left."""
+    def stopped():
+        return stop is not None and stop.is_set()
+
     try:
         for i in range(DING_REPEATS):
             if i:
                 time.sleep(DING_GAP_S)
+            if stopped():
+                return
             subprocess.run(["afplay", "-v", str(VOLUME), SOUND_FILE], check=True)
     except (OSError, subprocess.CalledProcessError) as e:
         print(f"warning: afplay failed ({e}); using notification and bell", file=sys.stderr)
+    if stopped():
+        return
     text = f"{tag.capitalize()} session done — {minutes} min"
     text = text.replace("\\", "\\\\").replace('"', '\\"')
     try:
@@ -378,13 +387,32 @@ def ding(tag: str, minutes: int) -> None:
     sys.stdout.flush()
 
 
+def start_ding(tag: str, minutes: int) -> threading.Event:
+    """Ding in the background so the focus question can be answered right away."""
+    stop = threading.Event()
+    threading.Thread(target=ding, args=(tag, minutes, stop), daemon=True).start()
+    return stop
+
+
+def read_key() -> str:
+    """One keypress, no Enter needed. '' on end of input."""
+    if not stdin_is_tty():
+        return sys.stdin.read(1)
+    with single_keys():
+        return os.read(sys.stdin.fileno(), 1).decode(errors="ignore")
+
+
 def ask_focus() -> bool:
-    """Enter/y = good. Only an explicit n/no counts as not focused."""
+    """y or Enter = good, n = not focused. One key, other keys ignored. Ctrl+C counts as good."""
+    print("Good focus session? [Y/n] ", end="", flush=True)
     try:
-        return input("Good focus session? [Y/n] ").strip().lower() not in ("n", "no")
-    except (EOFError, KeyboardInterrupt):
-        print()
-        return True
+        while (key := read_key().lower()) not in ("y", "n", "\r", "\n", ""):
+            pass
+        good = key != "n"
+    except KeyboardInterrupt:
+        good = True
+    print("y" if good else "n")
+    return good
 
 
 def start_caffeinate(pid: int) -> subprocess.Popen:
@@ -439,15 +467,15 @@ def cmd_start(conn, args) -> int:
         actual = actual_minutes(start_ts, end_ts, minutes)
         row_id = add_session(conn, tag, datetime.fromtimestamp(start_ts).astimezone(),
                     datetime.fromtimestamp(end_ts).astimezone(), minutes, actual, completed, "timer")
+        focused = True
         if completed:
-            try:
-                ding(tag, minutes)
-            except KeyboardInterrupt:
-                pass
+            stop = start_ding(tag, minutes)
+            focused = ask_focus()
+            stop.set()
     finally:
         caffeinate.terminate()
 
-    if completed and not ask_focus():
+    if completed and not focused:
         conn.execute("UPDATE sessions SET completed = 0 WHERE id = ?", (row_id,))
         conn.commit()
         console.print(f"🥀 {escape(tag)}: {actual:.0f} min logged, no plant this time.")
