@@ -25,7 +25,7 @@ from rich.progress_bar import ProgressBar
 from rich.table import Table
 from rich.text import Text
 
-SOUND_FILE = "/System/Library/Sounds/Glass.aiff"
+SOUND_FILE = "/System/Library/PrivateFrameworks/ToneLibrary.framework/Versions/A/Resources/Ringtones/Sonar.m4r"
 DING_REPEATS = 3
 DING_GAP_S = 1.5
 VOLUME = 1.0
