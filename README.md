@@ -58,7 +58,7 @@ $ bon week
   ...
   Total             7.5    2.0
 
-Work 7.5h / 40h  🟩🟩🟩🟩⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+Work 7.5h / 40h  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
 
 The bar is green, then yellow at 32h and red at 38h.
