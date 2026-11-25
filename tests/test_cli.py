@@ -458,3 +458,34 @@ def test_start_digits_only_means_minutes_empty_db(cli):
     cli.run(["start", "25"])
     assert cli.timer_calls == [(25, "work")]
     assert cli.prompts == []
+
+
+# --- log --start/--end ---------------------------------------------------
+def test_log_start_end_computes_minutes(cli, rows):
+    assert cli.run(["log", "w", "--date", YESTERDAY.isoformat(),
+                    "--start", "09:15", "--end", "11:45"]) == 0
+    (row,) = rows()
+    assert row["tag"] == "work"
+    assert row["start"].startswith(f"{YESTERDAY.isoformat()}T09:15")
+    assert row["end"].startswith(f"{YESTERDAY.isoformat()}T11:45")
+    assert row["actual_min"] == pytest.approx(150.0)
+    assert row["planned_min"] == 150
+
+
+def test_log_start_with_minutes_works_like_at(cli, rows):
+    assert cli.run(["log", "work", "30", "--date", YESTERDAY.isoformat(), "--start", "14:00"]) == 0
+    (row,) = rows()
+    assert row["start"].startswith(f"{YESTERDAY.isoformat()}T14:00")
+    assert row["actual_min"] == pytest.approx(30.0)
+
+
+@pytest.mark.parametrize("argv", [
+    ["log", "work"],                                          # no minutes, no range
+    ["log", "work", "--end", "11:00"],                        # end without start
+    ["log", "work", "30", "--start", "09:00", "--end", "10:00"],  # both
+    ["log", "work", "--start", "11:00", "--end", "11:00"],    # zero length
+    ["log", "work", "--start", "11:00", "--end", "09:00"],    # end before start
+])
+def test_log_start_end_rejects_bad_input(argv, cli, rows):
+    assert cli.run(argv) == 2
+    assert rows() == []

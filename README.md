@@ -84,6 +84,7 @@ Garden  streak 3  ·  best 3  ·  19 plants
 bon today                  # today's sessions
 bon tag writing 🌻         # pick a life tag's plant
 bon log w 30 --at 14:00    # add one I forgot
+bon log w --start 9:00 --end 11:30   # or give the times
 bon undo                   # delete the last one
 bon export                 # CSV of everything
 ```

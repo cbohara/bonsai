@@ -659,6 +659,22 @@ def at_arg(s: str) -> dtime:
         raise argparse.ArgumentTypeError(f"expected HH:MM, got {s!r}") from None
 
 
+def log_span(minutes: int | None, start: dtime | None, end: dtime | None) -> tuple[int, dtime]:
+    """Minutes and start time for `log`, from either minutes or --start/--end."""
+    if end is None:
+        if minutes is None:
+            raise ValueError("give minutes, or --start and --end")
+        return minutes, start or dtime(12, 0)
+    if minutes is not None:
+        raise ValueError("give minutes or --end, not both")
+    if start is None:
+        raise ValueError("--end needs --start")
+    span = (end.hour * 60 + end.minute) - (start.hour * 60 + start.minute)
+    if span < 1:
+        raise ValueError("--end must be after --start")
+    return span, start
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="bonsai", description="Pomodoro + time tracker with a garden.")
     sub = parser.add_subparsers(dest="cmd")
@@ -677,9 +693,10 @@ def build_parser() -> argparse.ArgumentParser:
 
     p = sub.add_parser("log", help="add a session you forgot to track")
     p.add_argument("tag")
-    p.add_argument("minutes", type=minutes_arg)
+    p.add_argument("minutes", nargs="?", type=minutes_arg, help="omit if you give --start and --end")
     p.add_argument("--date", type=date.fromisoformat, help="YYYY-MM-DD (default today)")
-    p.add_argument("--at", type=at_arg, default=dtime(12, 0), help="HH:MM start time (default 12:00)")
+    p.add_argument("--at", "--start", dest="at", type=at_arg, help="HH:MM start time (default 12:00)")
+    p.add_argument("--end", type=at_arg, help="HH:MM end time; minutes are worked out for you")
 
     p = sub.add_parser("tag", help="list tags or set a life tag's emoji")
     p.add_argument("name", nargs="?")
@@ -714,6 +731,11 @@ def main(argv: list[str] | None = None) -> int:
         except argparse.ArgumentTypeError as e:
             parser.error(str(e))
         args.tag = None
+    if args.cmd == "log":
+        try:
+            args.minutes, args.at = log_span(args.minutes, args.at, args.end)
+        except ValueError as e:
+            parser.error(str(e))
     conn = init_db(db_path())
     try:
         return COMMANDS[args.cmd](conn, args)
