@@ -26,7 +26,7 @@ alias bonsai="uv run ~/git/bonsai/bonsai.py"
 alias bon=bonsai
 ```
 
-Check the sound: `bon test-ding`
+Check the sound: `bonsai test-ding`
 
 ## A session
 
@@ -39,15 +39,15 @@ flowchart LR
 ```
 
 ```sh
-bon start w 30         # work
-bon start writing 45   # life tags are typed in full
-bon                    # repeat the last one
+bonsai start w 30         # work
+bonsai start writing 45   # life tags are typed in full
+bonsai                    # repeat the last one
 ```
 
 ## My week
 
 ```
-$ bon week
+$ bonsai week
   Day              Work   Life
  ──────────────────────────────
   Mon 2026-11-23    2.5    0.5
@@ -66,7 +66,7 @@ The bar is green, then yellow at 32h and red at 38h.
 One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 
 ```
-$ bon garden
+$ bonsai garden
 Garden  streak 3  ·  best 3  ·  19 plants
 
   Mon 2026-11-23   🌵 🌵 🌵 🌵 🌵   🍄        3.0
@@ -79,12 +79,12 @@ Garden  streak 3  ·  best 3  ·  19 plants
 ## Everything else
 
 ```sh
-bon today                  # today's sessions
-bon tag writing 🌻         # pick a life tag's plant
-bon log w 30 --at 14:00    # add one I forgot
-bon log w --start 9:00 --end 11:30   # or give the times
-bon undo                   # delete the last one
-bon export                 # CSV of everything
+bonsai today                  # today's sessions
+bonsai tag writing 🌻         # pick a life tag's plant
+bonsai log w 30 --at 14:00    # add one I forgot
+bonsai log w --start 9:00 --end 11:30   # or give the times
+bonsai undo                   # delete the last one
+bonsai export                 # CSV of everything
 ```
 
 Data lives in `~/.bonsai/bonsai.db`. Sound, repeats and volume are at the top of `bonsai.py`.
