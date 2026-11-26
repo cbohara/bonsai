@@ -591,14 +591,13 @@ def cmd_garden(conn, args) -> int:
     table = Table(box=box.SIMPLE_HEAD)
     table.add_column("Day")
     table.add_column("Plants")
-    table.add_column("Hours", justify="right")
     for i in range(28):
         d = first + timedelta(days=i)
         if i and d.weekday() == 0:
             table.add_section()
         day = [s for s in sessions if session_date(s["start"]) == d]
         row = garden_row(day_plants([s for s in day if s["completed"]]), tags)
-        table.add_row(f"{d:%a %Y-%m-%d}", row, f"{hours(day):.1f}")
+        table.add_row(f"{d:%a %Y-%m-%d}", row)
     console.print(table)
     legend = [f"{WORK_EMOJI} work"] + [f"{e} {escape(name)}" for name, e in tags.items()]
     console.print("  ".join(legend), soft_wrap=True)

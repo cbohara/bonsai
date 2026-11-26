@@ -40,7 +40,7 @@ def test_tag_command_set_is_retroactive(cli, rows, tags, day_row, capsys):
     assert "🌻" in out and "🍄" not in out
 
     cli.run(["garden"])
-    row = day_row(capsys.readouterr().out, TODAY)
+    row = day_row(capsys.readouterr().out, TODAY, plants_only=True)
     assert row is not None and "🌻" in row and "🍄" not in row
 
 
@@ -154,7 +154,7 @@ def test_log_yesterday_shows_in_week_and_garden(cli, rows, day_row, capsys):
     assert line is not None and "0.5" in line
 
     cli.run(["garden"])
-    line = day_row(capsys.readouterr().out, YESTERDAY)
+    line = day_row(capsys.readouterr().out, YESTERDAY, plants_only=True)
     assert line is not None and "🍄" in line
 
 
@@ -384,13 +384,15 @@ def test_garden_output(cli, add_session, day_row, capsys):
     first = MONDAY - timedelta(weeks=3)
     day_lines = []
     for i in range(28):
-        line = day_row(out, first + timedelta(days=i))
+        line = day_row(out, first + timedelta(days=i), plants_only=True)
         assert line is not None, first + timedelta(days=i)
         day_lines.append(line)
     assert len(set(day_lines)) == 28
     for d in recent:
-        assert day_row(out, d).count("🌵") == 2
-    assert day_row(out, old_mon) is None
+        assert day_row(out, d, plants_only=True).count("🌵") == 2
+        assert not re.search(r"\d\.\d", day_row(out, d, plants_only=True))  # plants only, no hours
+    assert "Hours" not in out
+    assert day_row(out, old_mon, plants_only=True) is None
 
     lines = out.splitlines()
     header = "\n".join(lines[: lines.index(day_lines[0])])

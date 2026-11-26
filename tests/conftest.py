@@ -198,14 +198,14 @@ def _date_patterns(d: date):
 @pytest.fixture
 def day_row():
     """Find the output line for day d: it names the date (or, if weekday_ok,
-    the weekday) and carries an hours value like 0.0."""
+    the weekday) and, unless plants_only (garden), carries an hours value like 0.0."""
 
-    def _find(out, d, weekday_ok=False):
+    def _find(out, d, weekday_ok=False, plants_only=False):
         pats = _date_patterns(d)
         if weekday_ok:
             pats.append(re.compile(rf"\b({d:%a}|{d:%A})\b"))
         for line in out.splitlines():
-            if re.search(r"\d+\.\d", line) and "total" not in line.lower() and any(
+            if (plants_only or re.search(r"\d+\.\d", line)) and "total" not in line.lower() and any(
                 p.search(line) for p in pats
             ):
                 return line

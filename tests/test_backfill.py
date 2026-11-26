@@ -150,7 +150,7 @@ def test_imported_days_show_in_garden(cli, csvfile, day_row, capsys):
     backfill.main(["import", csvfile(SAMPLE)])
     capsys.readouterr()
     cli.run(["garden"])
-    line = day_row(capsys.readouterr().out, D1)
+    line = day_row(capsys.readouterr().out, D1, plants_only=True)
     assert line is not None and "🌵" in line
 
 

@@ -58,7 +58,7 @@ When the session ends:
 - Separate plants with one space (`🌵 🌵 🌵   🍄 🍄 🌻`), work first, then three spaces, then life.
 - During a session a row of 4 spots fills in with progress: `🌱 · · ·` (0–24%) → `🌱 🌱 · ·` (25–49%) → `🌱 🌱 🌱 ·` (50–89%) → `🌱 🌱 🌱 🌵` (90–100%; the tag's own emoji for life). Stopping early wilts the newest sprout (e.g. `🌱 🌱 🥀 ·`), and nothing is planted.
 - **Streak (simple, will likely change):** consecutive weekdays with at least one completed session. Weekends never break it; today doesn't break it until the day is over.
-- `bonsai garden` shows a 4-week grid: one row per day (Mon–Sun), its plants, and hours. Header line: current streak, best streak, total plants. Footer: a legend built from the tags table (`🌵 work  🍄 study  🌻 writing …`).
+- `bonsai garden` shows a 4-week grid: one row per day (Mon–Sun) and its plants, no hours (those live in `week`). Header line: current streak, best streak, total plants. Footer: a legend built from the tags table (`🌵 work  🍄 study  🌻 writing …`).
 
 ## Tags and groups
 
