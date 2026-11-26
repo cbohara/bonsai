@@ -2,7 +2,24 @@
 
 A focus timer for my Mac's terminal. It dings in my headphones, tracks where my time goes, and grows a garden from the sessions I finish.
 
+```sh
+bonsai start work 30
+```
+
 ![bonsai timer](docs/img/timer.svg)
+
+```
+$ bonsai garden
+Garden  streak 3  ·  best 3  ·  19 plants
+
+  Mon 2026-11-23   🌵 🌵 🌵 🌵 🌵   🍄        3.0
+  Tue 2026-11-24   🌵 🌵 🌵 🌵 🌵   🌻 🌻     3.5
+  Wed 2026-11-25   🌵 🌵 🌵 🌵 🌵   🍄        3.0
+
+🌵 work  🍄 study  🌻 tinker
+```
+
+One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 
 ## Setup
 
@@ -46,21 +63,6 @@ Work 7.5h / 40h  ████████░░░░░░░░░░░░░
 ```
 
 The bar is green, then yellow at 32h and red at 38h.
-
-## My garden
-
-One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
-
-```
-$ bonsai garden
-Garden  streak 3  ·  best 3  ·  19 plants
-
-  Mon 2026-11-23   🌵 🌵 🌵 🌵 🌵   🍄        3.0
-  Tue 2026-11-24   🌵 🌵 🌵 🌵 🌵   🌻 🌻     3.5
-  Wed 2026-11-25   🌵 🌵 🌵 🌵 🌵   🍄        3.0
-
-🌵 work  🍄 study  🌻 tinker
-```
 
 ## Everything else
 
