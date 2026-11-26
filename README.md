@@ -16,6 +16,16 @@ $ bonsai garden
 
 One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 
+## My week
+
+```
+$ bonsai week
+```
+
+![bonsai week](docs/img/week.svg)
+
+The bar is green, then yellow at 32h and red at 38h.
+
 ## Setup
 
 Needs macOS and [uv](https://docs.astral.sh/uv/). Add to `~/.zshrc`:
@@ -41,16 +51,6 @@ bonsai start w 30         # work
 bonsai start writing 45   # life tags are typed in full
 bonsai                    # repeat the last one
 ```
-
-## My week
-
-```
-$ bonsai week
-```
-
-![bonsai week](docs/img/week.svg)
-
-The bar is green, then yellow at 32h and red at 38h.
 
 ## Everything else
 
