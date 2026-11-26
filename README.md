@@ -2,8 +2,8 @@
 
 A focus timer for my Mac's terminal. It dings in my headphones, tracks where my time goes, and grows a garden from the sessions I finish.
 
-```sh
-bonsai start work 30
+```
+$ bonsai start work 30
 ```
 
 ![bonsai timer](docs/img/timer.svg)
