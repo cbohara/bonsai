@@ -28,13 +28,9 @@ Check the sound: `bonsai test-ding`
 
 ## A session
 
-```mermaid
-flowchart LR
-    A["🌱 🌱 · ·"] -- "time's up" --> B["ding<br/>focused?"]
-    A -- "q" --> C["🥀 hours only"]
-    B -- "y" --> D["🌵 planted"]
-    B -- "n" --> C
-```
+When the timer ends, it dings and asks if I really focused. Saying no, or stopping early with q, still logs the time, but nothing grows.
+
+![bonsai focus check](docs/img/focus.svg?v=2)
 
 ```sh
 bonsai start w 30         # work
