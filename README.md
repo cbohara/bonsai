@@ -23,7 +23,6 @@ Needs macOS and [uv](https://docs.astral.sh/uv/). Add to `~/.zshrc`:
 
 ```sh
 alias bonsai="uv run ~/git/bonsai/bonsai.py"
-alias bon=bonsai
 ```
 
 Check the sound: `bonsai test-ding`
