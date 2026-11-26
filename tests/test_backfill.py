@@ -146,7 +146,8 @@ def test_set_aside_rows_import_once_given_a_project(cli, rows, csvfile):
     assert len(rows()) == 4
 
 
-def test_imported_days_show_in_garden(cli, csvfile, day_row, capsys):
+def test_imported_days_show_in_garden(cli, csvfile, day_row, freeze_today, capsys):
+    freeze_today(D1)  # garden shows D1's week
     backfill.main(["import", csvfile(SAMPLE)])
     capsys.readouterr()
     cli.run(["garden"])

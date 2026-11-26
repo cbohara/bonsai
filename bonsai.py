@@ -588,15 +588,13 @@ def cmd_garden(conn, args) -> int:
                   f"  ·  best {best_streak(dates)}  ·  {total_plants} plants")
     legend = [f"{WORK_EMOJI} work"] + [f"{e} {escape(name)}" for name, e in tags.items()]
     console.print("  ".join(legend), soft_wrap=True)
-    first = week_bounds(today)[0] - timedelta(weeks=3)
-    sessions = fetch_sessions(conn, first, first + timedelta(days=27))
+    first, last = week_bounds(today)
+    sessions = fetch_sessions(conn, first, last)
     table = Table(box=box.SIMPLE_HEAD)
     table.add_column("Day")
     table.add_column("Plants")
-    for i in range(28):
+    for i in range(7):
         d = first + timedelta(days=i)
-        if i and d.weekday() == 0:
-            table.add_section()
         day = [s for s in sessions if session_date(s["start"]) == d]
         row = garden_row(day_plants([s for s in day if s["completed"]]), tags)
         table.add_row(f"{d:%a %Y-%m-%d}", row)

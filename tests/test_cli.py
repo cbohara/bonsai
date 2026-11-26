@@ -139,7 +139,7 @@ def test_start_writes_row_and_dings_caffeinate_first(cli):
 
 
 # --- 15 ------------------------------------------------------------------
-def test_log_yesterday_shows_in_week_and_garden(cli, rows, day_row, capsys):
+def test_log_yesterday_shows_in_week(cli, rows, day_row, capsys):
     assert cli.run(["log", "learning", "30", "--date", YESTERDAY.isoformat()]) == 0
     assert [p.strip() for p in cli.prompts] == ['New tag "learning"? [y/N]']
     (row,) = rows()
@@ -153,9 +153,6 @@ def test_log_yesterday_shows_in_week_and_garden(cli, rows, day_row, capsys):
     line = day_row(capsys.readouterr().out, YESTERDAY, weekday_ok=True)
     assert line is not None and "0.5" in line
 
-    cli.run(["garden"])
-    line = day_row(capsys.readouterr().out, YESTERDAY, plants_only=True)
-    assert line is not None and "🍄" in line
 
 
 def test_log_yesterday_at_sets_start_time(cli, rows):
@@ -370,29 +367,32 @@ def _prev_weekdays(n):
     return days
 
 
-def test_garden_output(cli, add_session, day_row, capsys):
-    old_mon = MONDAY - timedelta(weeks=10)
-    for i in range(4):  # 4-weekday streak, 4 plants, all older than 4 weeks
+def test_garden_output(cli, add_session, day_row, freeze_today, capsys):
+    wed = date(2026, 11, 25)  # a Wednesday; the garden shows Mon 11-23 .. Sun 11-29
+    mon = wed - timedelta(days=2)
+    freeze_today(wed)
+    old_mon = mon - timedelta(weeks=10)
+    for i in range(4):  # best streak 4, 4 plants, long before this week
         add_session("learning", old_mon + timedelta(days=i), actual_min=30, emoji="🍄")
-    recent = _prev_weekdays(3)
-    for d in recent:  # current streak 3 (today has none yet), 2 plants each
+    last_fri = mon - timedelta(days=3)
+    for d in (last_fri, mon, mon + timedelta(days=1)):  # current streak 3, 2 plants each
         add_session("work", d, actual_min=60)
-    add_session("writing", TODAY, actual_min=90, completed=0, emoji="🌻")  # no plants
+    add_session("writing", wed, actual_min=90, completed=0, emoji="🌻")  # no plants
 
     assert cli.run(["garden"]) == 0
     out = capsys.readouterr().out
-    first = MONDAY - timedelta(weeks=3)
     day_lines = []
-    for i in range(28):
-        line = day_row(out, first + timedelta(days=i), plants_only=True)
-        assert line is not None, first + timedelta(days=i)
+    for i in range(7):
+        line = day_row(out, mon + timedelta(days=i), plants_only=True)
+        assert line is not None, mon + timedelta(days=i)
         day_lines.append(line)
-    assert len(set(day_lines)) == 28
-    for d in recent:
+    assert len(set(day_lines)) == 7
+    assert day_row(out, last_fri, plants_only=True) is None  # only this week
+    for d in (mon, mon + timedelta(days=1)):
         assert day_row(out, d, plants_only=True).count("🌵") == 2
         assert not re.search(r"\d\.\d", day_row(out, d, plants_only=True))  # plants only, no hours
+    assert "🌻" not in day_lines[2]
     assert "Hours" not in out
-    assert day_row(out, old_mon, plants_only=True) is None
 
     lines = out.splitlines()
     header = "\n".join(lines[: lines.index(day_lines[0])])

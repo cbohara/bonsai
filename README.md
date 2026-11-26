@@ -12,7 +12,7 @@ $ bonsai start work 30
 $ bonsai garden
 ```
 
-![bonsai garden](docs/img/garden.svg?v=2)
+![bonsai garden](docs/img/garden.svg?v=3)
 
 One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 

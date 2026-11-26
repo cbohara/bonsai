@@ -212,3 +212,18 @@ def day_row():
         return None
 
     return _find
+
+
+@pytest.fixture
+def freeze_today(monkeypatch):
+    """Pin bonsai's date.today() to a given day."""
+
+    def _freeze(day):
+        class Fixed(date):
+            @classmethod
+            def today(cls):
+                return day
+
+        monkeypatch.setattr(bonsai, "date", Fixed)
+
+    return _freeze
