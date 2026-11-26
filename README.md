@@ -6,13 +6,13 @@ A focus timer for my Mac's terminal. It dings in my headphones, tracks where my 
 $ bonsai start work 30
 ```
 
-![bonsai timer](docs/img/timer.svg)
+![bonsai timer](docs/img/timer.svg?v=2)
 
 ```
 $ bonsai garden
 ```
 
-![bonsai garden](docs/img/garden.svg)
+![bonsai garden](docs/img/garden.svg?v=2)
 
 One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 
