@@ -10,14 +10,9 @@ $ bonsai start work 30
 
 ```
 $ bonsai garden
-Garden  streak 3  ·  best 3  ·  19 plants
-
-  Mon 2026-11-23   🌵 🌵 🌵 🌵 🌵   🍄        3.0
-  Tue 2026-11-24   🌵 🌵 🌵 🌵 🌵   🌻 🌻     3.5
-  Wed 2026-11-25   🌵 🌵 🌵 🌵 🌵   🍄        3.0
-
-🌵 work  🍄 study  🌻 tinker
 ```
+
+![bonsai garden](docs/img/garden.svg)
 
 One plant per 30 minutes. Work is always 🌵, and each life tag has its own plant.
 
@@ -51,16 +46,9 @@ bonsai                    # repeat the last one
 
 ```
 $ bonsai week
-  Day              Work   Life
- ──────────────────────────────
-  Mon 2026-11-23    2.5    0.5
-  Tue 2026-11-24    2.5    1.0
-  Wed 2026-11-25    2.5    0.5
-  ...
-  Total             7.5    2.0
-
-Work 7.5h / 40h  ████████░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░
 ```
+
+![bonsai week](docs/img/week.svg)
 
 The bar is green, then yellow at 32h and red at 38h.
 
