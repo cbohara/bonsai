@@ -402,6 +402,7 @@ def test_garden_output(cli, add_session, day_row, capsys):
     legend = [ln for ln in lines if re.search(r"🌵\s+work", ln)]
     assert legend, out
     leg = legend[-1]
+    assert lines.index(leg) < lines.index(day_lines[0])  # legend sits at the top
     assert re.search(r"🍄\s+learning", leg) and re.search(r"🌻\s+writing", leg)
     assert leg.index("🌵") < min(leg.index("🍄"), leg.index("🌻"))
 
